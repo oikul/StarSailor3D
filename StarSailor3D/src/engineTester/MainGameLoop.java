@@ -1,5 +1,9 @@
 package engineTester;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -10,9 +14,9 @@ import models.RawModel;
 import models.TexturedModel;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
+import renderEngine.MasterRenderer;
 import renderEngine.OBJLoader;
-import renderEngine.Renderer;
-import shaders.StaticShader;
+import terrain.Terrain;
 import textures.ModelTexture;
 
 public class MainGameLoop {
@@ -20,29 +24,32 @@ public class MainGameLoop {
 	public static void main(String[] args) {
 		DisplayManager.createDisplay();
 		Loader loader = new Loader();
-		StaticShader shader = new StaticShader();
-		Renderer renderer = new Renderer(shader);
-		
+		MasterRenderer renderer = new MasterRenderer();
+		Random random = new Random();
 		RawModel model = OBJLoader.loadObjModel("planet_model_1", loader);
 		ModelTexture texture = new ModelTexture(loader.loadTexture("grass/grass_plains"));
 		texture.setShineDamper(30);
 		texture.setReflectivity(0);
 		TexturedModel texturedModel = new TexturedModel(model, texture);
-		Entity entity = new Entity(texturedModel, new Vector3f(0, 0, -5), 0, 0, 0, 1);
-		Light light = new Light(new Vector3f(-2, 0, 2), new Vector3f(1f,0.4f,1));
+		Light light = new Light(new Vector3f(3000, 2000, 2000), new Vector3f(1f, 1f, 1f));
 		Camera camera = new Camera();
+		List<Entity> planets = new ArrayList<Entity>();
+		for (int i = 0; i < 100; i++) {
+			float x = random.nextFloat() * 100 - 50;
+			float y = random.nextFloat() * 100 - 50;
+			float z = random.nextFloat() * 100 - 50;
+			planets.add(new Entity(texturedModel, new Vector3f(x, y, z), 0,0,0,1));
+		}
+		Terrain terrain = new Terrain(0, -1, loader, texture);
+		Terrain terrain1 = new Terrain(1, -1, loader, texture);
 		while (!Display.isCloseRequested()) {
-			entity.increaseRotation(0.5f,  0.5f, 0);
 			camera.move();
-			renderer.prepare();
-			shader.start();
-			shader.loadLight(light);
-			shader.loadViewMatrix(camera);
-			renderer.render(entity, shader);
-			shader.stop();
+			renderer.processTerrain(terrain);
+			renderer.processTerrain(terrain1);
+			renderer.render(light, camera);
 			DisplayManager.updateDisplay();
 		}
-		shader.cleanUp();
+		renderer.cleanUp();
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
 	}
