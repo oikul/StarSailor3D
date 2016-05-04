@@ -21,7 +21,7 @@ public class Planet extends PlanetaryBody {
 	}
 
 	@Override
-	public void generateSurface(int stacks, int slices) {
+	public void generateSurface() {
 		generated = true;
 	}
 

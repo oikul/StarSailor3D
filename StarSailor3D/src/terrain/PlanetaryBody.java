@@ -30,7 +30,7 @@ public abstract class PlanetaryBody {
 
 	public abstract void update();
 
-	public abstract void generateSurface(int stacks, int slices);
+	public abstract void generateSurface();
 
 	public abstract void render(Light light, Camera camera);
 
